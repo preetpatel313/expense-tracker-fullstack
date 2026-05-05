@@ -1,228 +1,1016 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login | FinDash</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinDash - Smart Finance Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-/* ... [Keeping your core reset and body styles] ... */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", sans-serif;
-}
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #0a0e17;
+            color: #e8ecf2;
+            min-height: 100vh;
+        }
 
-body {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #0f172a;
-  overflow: hidden;
-}
+        /* Auth Container */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0e17 0%, #111827 100%);
+        }
 
-#particles {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
+        .auth-card {
+            background: rgba(22, 28, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 40px;
+            width: 100%;
+            max-width: 440px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
 
-.box {
-  width: 360px;
-  padding: 35px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: white;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  z-index: 10;
-}
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
 
-h2 {
-  text-align: center;
-  margin-bottom: 24px;
-  font-size: 28px;
-  background: linear-gradient(90deg,#3b82f6,#22c55e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+        .logo i {
+            font-size: 3rem;
+            color: #4b91f7;
+            margin-bottom: 12px;
+        }
 
-/* INPUT REFINEMENT */
-input {
-  width: 100%;
-  padding: 14px;
-  margin: 10px 0;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.05);
-  color: white;
-  outline: none;
-  transition: border 0.3s ease;
-}
+        .logo h1 {
+            color: #e8ecf2;
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
 
-input:focus {
-  border: 1px solid #3b82f6;
-}
+        .logo p {
+            color: #a0aec0;
+            font-size: 0.85rem;
+        }
 
-.pw-box {
-  position: relative;
-}
+        .input-group {
+            margin-bottom: 20px;
+        }
 
-/* Redesigned Toggle Eye */
-.toggle-eye {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  font-size: 18px;
-  margin-top: 0; /* Override global button margin */
-  width: auto;   /* Override global button width */
-}
+        .input-group label {
+            display: block;
+            color: #a0aec0;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
 
-/* Primary Button */
-.btn-login {
-  width: 100%;
-  padding: 14px;
-  margin-top: 15px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(90deg,#3b82f6,#06b6d4);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
-}
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #0f1520;
+            border: 2px solid #1e2a3d;
+            border-radius: 14px;
+            color: #e8ecf2;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
 
-.btn-login:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
+        .input-group input:focus {
+            outline: none;
+            border-color: #4b91f7;
+            box-shadow: 0 0 0 4px rgba(75, 145, 247, 0.15);
+        }
 
-a {
-  display: block;
-  text-align: center;
-  margin-top: 18px;
-  color: #93c5fd;
-  text-decoration: none;
-  font-size: 14px;
-}
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4b91f7, #3069e0);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
 
-a:hover { text-decoration: underline; }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(75, 145, 247, 0.3);
+        }
 
-@media (max-width: 480px) {
-  .box { width: 90%; padding: 25px; }
-}
-</style>
+        .toggle-text {
+            text-align: center;
+            margin-top: 24px;
+            color: #a0aec0;
+            font-size: 0.85rem;
+        }
+
+        .toggle-text a {
+            color: #4b91f7;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .error-msg {
+            background: rgba(245, 91, 108, 0.1);
+            border: 1px solid rgba(245, 91, 108, 0.3);
+            color: #f55b6c;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .success-msg {
+            background: rgba(61, 214, 140, 0.1);
+            border: 1px solid rgba(61, 214, 140, 0.3);
+            color: #3dd68c;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            display: none;
+        }
+
+        .navbar {
+            background: rgba(10, 14, 23, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-area i {
+            font-size: 28px;
+            color: #4b91f7;
+        }
+
+        .logo-area h2 {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .logo-area p {
+            font-size: 12px;
+            color: #6b7c93;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .user-info {
+            background: #1e293b;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(245, 91, 108, 0.15);
+            border: 1px solid rgba(245, 91, 108, 0.3);
+            color: #f55b6c;
+            padding: 8px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: #f55b6c;
+            color: white;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 28px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 16px;
+            }
+        }
+
+        .glass-card {
+            background: rgba(22, 28, 42, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 24px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .section-title i {
+            color: #4b91f7;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: #111a28;
+            border: 1px solid #1e2a3d;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            font-size: 11px;
+            color: #6b7c93;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .stat-value.positive { color: #3dd68c; }
+        .stat-value.negative { color: #f55b6c; }
+
+        .budget-panel {
+            padding: 12px;
+            border-radius: 12px;
+            margin: 12px 0;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            background: #1a2436;
+        }
+
+        .budget-panel.success {
+            background: rgba(61, 214, 140, 0.1);
+            color: #3dd68c;
+        }
+
+        .budget-panel.warning {
+            background: rgba(245, 91, 108, 0.1);
+            color: #f55b6c;
+        }
+
+        .charts-flex {
+            display: flex;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .chart-box {
+            flex: 1;
+            background: #111a28;
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .chart-box canvas {
+            max-height: 180px;
+            width: 100%;
+        }
+
+        .filter-area {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .filter-area input {
+            flex: 1;
+            padding: 10px 14px;
+            background: #0d131e;
+            border: 2px solid #1e2a3d;
+            border-radius: 12px;
+            color: #e8ecf2;
+        }
+
+        .btn-secondary {
+            padding: 10px 18px;
+            background: #1e293b;
+            border: 1px solid #2d3a55;
+            color: #a0aec0;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .tx-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .tx-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            background: #141c2a;
+            border: 1px solid #1e2a3d;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .tx-info {
+            flex: 1;
+        }
+
+        .tx-title {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .tx-meta {
+            font-size: 11px;
+            color: #6b7c93;
+        }
+
+        .tx-amount {
+            font-weight: 800;
+            font-size: 16px;
+            margin: 0 12px;
+        }
+
+        .income-color { color: #3dd68c; }
+        .expense-color { color: #f55b6c; }
+
+        .edit-btn, .del-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .edit-btn {
+            background: rgba(247, 185, 85, 0.15);
+            color: #f7b955;
+        }
+
+        .del-btn {
+            background: rgba(245, 91, 108, 0.15);
+            color: #f55b6c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6b7c93;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #1f2a3d;
+            margin: 16px 0;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: #161c2a;
+            border: 1px solid #2a364f;
+            border-radius: 24px;
+            padding: 28px;
+            width: 90%;
+            max-width: 420px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            padding: 14px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            z-index: 1100;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .charts-flex { flex-direction: column; }
+            .stats-row { flex-direction: column; }
+        }
+    </style>
 </head>
-
 <body>
-
-<canvas id="particles"></canvas>
-
-<div class="box">
-  <h2>FinDash</h2>
-
-  <form id="loginForm" onsubmit="handleLogin(event)">
-    <input type="email" id="email" placeholder="Email" required>
-
-    <div class="pw-box">
-      <input type="password" id="password" placeholder="Password" required>
-      <button type="button" class="toggle-eye" onclick="togglePassword()" aria-label="Toggle Password Visibility">
-        <span id="eyeIcon">🙈</span>
-      </button>
+    <!-- Login/Signup Section -->
+    <div id="authSection" class="auth-container">
+        <div class="auth-card">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>FinDash</h1>
+                <p>Smart Finance Tracker</p>
+            </div>
+            <div id="authMessage"></div>
+            <div id="loginForm">
+                <div class="input-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="loginEmail" placeholder="hello@example.com">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
+                <div class="toggle-text">
+                    Don't have an account? <a onclick="showSignup()">Sign up</a>
+                </div>
+            </div>
+            <div id="signupForm" style="display: none;">
+                <div class="input-group">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" id="signupName" placeholder="John Doe">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="signupEmail" placeholder="hello@example.com">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-check-circle"></i> Confirm Password</label>
+                    <input type="password" id="signupConfirm" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" onclick="handleSignup()"><i class="fas fa-user-plus"></i> Create Account</button>
+                <div class="toggle-text">
+                    Already have an account? <a onclick="showLogin()">Login</a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <button type="submit" class="btn-login">Login</button>
-  </form>
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="dashboard-container">
+        <div class="navbar">
+            <div class="logo-area">
+                <i class="fas fa-chart-line"></i>
+                <h2>FinDash</h2>
+                <p>Smart Finance Tracker</p>
+            </div>
+            <div class="nav-actions">
+                <span class="user-info" id="userNameDisplay">User</span>
+                <button class="logout-btn" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
 
-  <a href="signup.html">Create new account</a>
-</div>
+        <div class="dashboard-grid">
+            <div class="glass-card">
+                <div class="section-title">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>New Transaction</span>
+                </div>
+                <div class="input-group">
+                    <label>Title</label>
+                    <input type="text" id="title" placeholder="e.g., Salary, Groceries">
+                </div>
+                <div class="input-group">
+                    <label>Amount</label>
+                    <input type="number" id="amount" placeholder="0.00">
+                </div>
+                <div class="input-group">
+                    <label>Type</label>
+                    <select id="type">
+                        <option value="income">💰 Income</option>
+                        <option value="expense">📉 Expense</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="addTransaction()">
+                    <i class="fas fa-save"></i> Add Transaction
+                </button>
+                <hr>
+                <div class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Budget Guard</span>
+                </div>
+                <div class="input-group">
+                    <label>Monthly Spending Limit</label>
+                    <input type="number" id="budget" placeholder="Set your budget">
+                </div>
+                <button class="btn-secondary" onclick="setBudget()">
+                    <i class="fas fa-check-circle"></i> Set Budget
+                </button>
+                <div class="budget-panel" id="budgetStatusMsg">💰 No budget set</div>
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <h4><i class="fas fa-coins"></i> Balance</h4>
+                        <div class="stat-value" id="balance">₹0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4><i class="fas fa-list-ul"></i> Transactions</h4>
+                        <div class="stat-value" id="count">0</div>
+                    </div>
+                </div>
+                <div class="charts-flex">
+                    <div class="chart-box"><canvas id="pieChart"></canvas></div>
+                    <div class="chart-box"><canvas id="lineChart"></canvas></div>
+                </div>
+            </div>
 
-<script src="/frontend/js/auth.js"></script>
+            <div class="glass-card">
+                <div class="section-title">
+                    <i class="fas fa-history"></i>
+                    <span>Transaction History</span>
+                </div>
+                <div class="filter-area">
+                    <input type="month" id="monthFilter" onchange="loadData()">
+                    <button class="btn-secondary" onclick="resetFilter()">
+                        <i class="fas fa-undo-alt"></i> Reset
+                    </button>
+                </div>
+                <div id="txListContainer" class="tx-list">
+                    <div id="list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script>
-// Prevent default form behavior and call your existing auth.js login
-function handleLogin(e){
-  e.preventDefault();
-  const emailVal = document.getElementById("email").value;
-  const passVal = document.getElementById("password").value;
-  
-  // Calling your function from auth.js
-  login(emailVal, passVal);
-}
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <h3><i class="fas fa-pen"></i> Edit Transaction</h3>
+            <div class="input-group">
+                <label>Title</label>
+                <input type="text" id="editTitle">
+            </div>
+            <div class="input-group">
+                <label>Amount</label>
+                <input type="number" id="editAmount">
+            </div>
+            <div class="input-group">
+                <label>Type</label>
+                <select id="editType">
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveEdit()">Save</button>
+            </div>
+        </div>
+    </div>
 
-function togglePassword(){
-  const pass = document.getElementById("password");
-  const icon = document.getElementById("eyeIcon");
+    <div class="toast" id="toast">
+        <span id="toastIcon"></span>
+        <span id="toastMsg"></span>
+    </div>
 
-  if(pass.type === "password"){
-    pass.type = "text";
-    icon.innerText = "👁️";
-  } else {
-    pass.type = "password";
-    icon.innerText = "🙈";
-  }
-}
+    <script>
+        // ============ APP STATE ============
+        let currentUser = null;
+        let transactions = [];
+        let currentBudget = 0;
+        let editingId = null;
+        let pieChart = null;
+        let lineChart = null;
 
-/* Particle logic (optimized) */
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
+        const USERS_KEY = "fintech_users";
+        const STORAGE_KEY = "fintech_transactions";
+        const BUDGET_KEY = "monthly_budget";
 
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener("resize", resize);
-resize();
+        // ============ AUTH FUNCTIONS ============
+        function showMessage(msg, isError = true, container = "authMessage") {
+            const el = document.getElementById(container);
+            el.innerHTML = `<div class="${isError ? 'error-msg' : 'success-msg'}">${msg}</div>`;
+            setTimeout(() => { el.innerHTML = ""; }, 3000);
+        }
 
-let particles = [];
-class Particle {
-  constructor(){
-    this.init();
-  }
-  init() {
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.vx = (Math.random() - 0.5) * 0.8;
-    this.vy = (Math.random() - 0.5) * 0.8;
-    this.size = Math.random() * 2;
-  }
-  move(){
-    this.x += this.vx;
-    this.y += this.vy;
-    if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
-    if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
-  }
-  draw(){
-    ctx.fillStyle = "rgba(59, 130, 246, 0.4)";
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById("toast");
+            const icon = document.getElementById("toastIcon");
+            const icons = { success: "✓", error: "✕", info: "ℹ" };
+            icon.textContent = icons[type] || "•";
+            document.getElementById("toastMsg").textContent = msg;
+            toast.className = `toast show`;
+            setTimeout(() => { toast.className = "toast"; }, 3000);
+        }
 
-function init(){
-  particles = [];
-  for(let i=0; i<80; i++) particles.push(new Particle());
-}
+        function showLogin() {
+            document.getElementById("loginForm").style.display = "block";
+            document.getElementById("signupForm").style.display = "none";
+            document.getElementById("authMessage").innerHTML = "";
+        }
 
-function animate(){
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles.forEach(p => { p.move(); p.draw(); });
-  requestAnimationFrame(animate);
-}
+        function showSignup() {
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("signupForm").style.display = "block";
+            document.getElementById("authMessage").innerHTML = "";
+        }
 
-init();
-animate();
-</script>
+        function handleLogin() {
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
 
+            if (!email || !password) {
+                showMessage("Please fill all fields", true);
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                localStorage.setItem("currentUser", JSON.stringify(user));
+                showMessage("Login successful!", false);
+                setTimeout(() => {
+                    document.getElementById("authSection").style.display = "none";
+                    document.getElementById("dashboardSection").style.display = "block";
+                    document.getElementById("userNameDisplay").innerHTML = `<i class="fas fa-user-circle"></i> ${user.name}`;
+                    initDashboard();
+                }, 1000);
+            } else {
+                showMessage("Invalid email or password", true);
+            }
+        }
+
+        function handleSignup() {
+            const name = document.getElementById("signupName").value.trim();
+            const email = document.getElementById("signupEmail").value.trim();
+            const password = document.getElementById("signupPassword").value;
+            const confirm = document.getElementById("signupConfirm").value;
+
+            if (!name || !email || !password) {
+                showMessage("Please fill all fields", true);
+                return;
+            }
+
+            if (password !== confirm) {
+                showMessage("Passwords do not match", true);
+                return;
+            }
+
+            if (password.length < 4) {
+                showMessage("Password must be at least 4 characters", true);
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+            
+            if (users.find(u => u.email === email)) {
+                showMessage("Email already registered", true);
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                password: password,
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            
+            showMessage("Account created! Please login.", false);
+            setTimeout(() => showLogin(), 1500);
+        }
+
+        function handleLogout() {
+            localStorage.removeItem("currentUser");
+            currentUser = null;
+            document.getElementById("authSection").style.display = "flex";
+            document.getElementById("dashboardSection").style.display = "none";
+            document.getElementById("loginEmail").value = "";
+            document.getElementById("loginPassword").value = "";
+            showToast("Logged out successfully!", "info");
+        }
+
+        // ============ DASHBOARD FUNCTIONS ============
+        function formatCurrency(amount) {
+            return `₹${Math.abs(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+
+        function getCurrentDate() {
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
+
+        function saveTransactions() {
+            if (currentUser) {
+                localStorage.setItem(`${STORAGE_KEY}_${currentUser.id}`, JSON.stringify(transactions));
+            }
+        }
+
+        function loadUserTransactions() {
+            if (currentUser) {
+                const stored = localStorage.getItem(`${STORAGE_KEY}_${currentUser.id}`);
+                transactions = stored ? JSON.parse(stored) : [];
+            }
+        }
+
+        function addTransaction() {
+            const title = document.getElementById("title").value.trim();
+            const amount = parseFloat(document.getElementById("amount").value);
+            const type = document.getElementById("type").value;
+
+            if (!title) { showToast("Enter a title", "error"); return; }
+            if (!amount || amount <= 0) { showToast("Enter valid amount", "error"); return; }
+
+            transactions.unshift({
+                id: Date.now(),
+                title: title,
+                amount: amount,
+                type: type,
+                date: getCurrentDate()
+            });
+
+            saveTransactions();
+            document.getElementById("title").value = "";
+            document.getElementById("amount").value = "";
+            showToast("Transaction added!");
+            loadData();
+        }
+
+        function deleteTransaction(id) {
+            if (confirm("Delete this transaction?")) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveTransactions();
+                showToast("Transaction deleted", "info");
+                loadData();
+            }
+        }
+
+        function openEdit(id) {
+            const tx = transactions.find(t => t.id === id);
+            if (tx) {
+                editingId = id;
+                document.getElementById("editTitle").value = tx.title;
+                document.getElementById("editAmount").value = tx.amount;
+                document.getElementById("editType").value = tx.type;
+                document.getElementById("editModal").classList.add("open");
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("editModal").classList.remove("open");
+            editingId = null;
+        }
+
+        function saveEdit() {
+            const title = document.getElementById("editTitle").value.trim();
+            const amount = parseFloat(document.getElementById("editAmount").value);
+            const type = document.getElementById("editType").value;
+
+            if (!title || !amount || amount <= 0) {
+                showToast("Fill all fields", "error");
+                return;
+            }
+
+            const index = transactions.findIndex(t => t.id === editingId);
+            if (index !== -1) {
+                transactions[index] = { ...transactions[index], title, amount, type };
+                saveTransactions();
+                showToast("Transaction updated!");
+                closeModal();
+                loadData();
+            }
+        }
+
+        function setBudget() {
+            const budget = parseFloat(document.getElementById("budget").value);
+            if (!budget || budget <= 0) {
+                showToast("Enter valid budget", "error");
+                return;
+            }
+            currentBudget = budget;
+            localStorage.setItem(`${BUDGET_KEY}_${currentUser?.id}`, currentBudget);
+            showToast(`Budget set to ${formatCurrency(budget)}`);
+            loadData();
+        }
+
+        function resetFilter() {
+            document.getElementById("monthFilter").value = "";
+            loadData();
+        }
+
+        function updateCharts(incomeTotal, expenseTotal, dataArray) {
+            const ctx1 = document.getElementById("pieChart").getContext("2d");
+            const ctx2 = document.getElementById("lineChart").getContext("2d");
+            
+            if (pieChart) pieChart.destroy();
+            if (lineChart) lineChart.destroy();
+            
+            pieChart = new Chart(ctx1, {
+                type: "doughnut",
+                data: {
+                    labels: ["Income", "Expense"],
+                    datasets: [{ data: [incomeTotal, expenseTotal], backgroundColor: ["#3dd68c", "#f55b6c"], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: "bottom", labels: { color: "#a0aec0" } } } }
+            });
+            
+            lineChart = new Chart(ctx2, {
+                type: "line",
+                data: {
+                    labels: dataArray.map((_, i) => i + 1),
+                    datasets: [{
+                        label: "Cash Flow",
+                        data: dataArray.map(tx => tx.type === "income" ? tx.amount : -tx.amount),
+                        borderColor: "#4b91f7",
+                        backgroundColor: "rgba(75, 145, 247, 0.1)",
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: "#a0aec0" } } } }
+            });
+        }
+
+        function loadData() {
+            const monthFilter = document.getElementById("monthFilter").value;
+            let filtered = [...transactions];
+            
+            if (monthFilter) {
+                filtered = transactions.filter(tx => tx.date && tx.date.startsWith(monthFilter));
+            }
+            
+            let incomeTotal = 0, expenseTotal = 0;
+            filtered.forEach(tx => {
+                if (tx.type === "income") incomeTotal += tx.amount;
+                else expenseTotal += tx.amount;
+            });
+            
+            const balance = incomeTotal - expenseTotal;
+            const balanceEl = document.getElementById("balance");
+            balanceEl.textContent = `${balance < 0 ? "-" : ""}${formatCurrency(Math.abs(balance))}`;
+            balanceEl.className = `stat-value ${balance >= 0 ? "positive" : "negative"}`;
+            document.getElementById("count").textContent = filtered.length;
+            
+            const budgetEl = document.getElementById("budgetStatusMsg");
+            if (currentBudget > 0) {
+                const remaining = currentBudget - expenseTotal;
+                if (remaining >= 0) {
+                    budgetEl.className = "budget-panel success";
+                    budgetEl.innerHTML = `✅ Budget OK: ${formatCurrency(remaining)} remaining of ${formatCurrency(currentBudget)}`;
+                } else {
+                    budgetEl.className = "budget-panel warning";
+                    budgetEl.innerHTML = `⚠️ OVER BUDGET: ${formatCurrency(Math.abs(remaining))} over ${formatCurrency(currentBudget)}`;
+                }
+            } else {
+                budgetEl.className = "budget-panel";
+                budgetEl.innerHTML = "💰 No budget set";
+            }
+            
+            updateCharts(incomeTotal, expenseTotal, filtered);
+            
+            const listEl = document.getElementById("list");
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><br>No transactions found</div>';
+            } else {
+                listEl.innerHTML = filtered.map(tx => `
+                    <div class="tx-item">
+                        <div class="tx-info">
+                            <div class="tx-title">${escapeHtml(tx.title)}</div>
+                            <div class="tx-meta"><i class="fas fa-calendar-alt"></i> ${tx.date}</div>
+                        </div>
+                        <div class="tx-amount ${tx.type}-color">
+                            ${tx.type === "income" ? "+" : "-"} ${formatCurrency(tx.amount)}
+                        </div>
+                        <div class="tx-actions">
+                            <button class="edit-btn" onclick="openEdit(${tx.id})"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="del-btn" onclick="deleteTransaction(${tx.id})"><i class="fas fa-trash"></i> Del</button>
+                        </div>
+                    </div>
+                `).join("");
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return str.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+        }
+
+        function initDashboard() {
+            loadUserTransactions();
+            
+            const savedBudget = localStorage.getItem(`${BUDGET_KEY}_${currentUser?.id}`);
+            if (savedBudget) {
+                currentBudget = Number(savedBudget);
+                document.getElementById("budget").value = currentBudget;
+            }
+            
+            const today = new Date();
+            document.getElementById("monthFilter").value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+            loadData();
+        }
+
+        // ============ CHECK FOR EXISTING SESSION ============
+        function checkSession() {
+            const savedUser = localStorage.getItem("currentUser");
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById("authSection").style.display = "none";
+                document.getElementById("dashboardSection").style.display = "block";
+                document.getElementById("userNameDisplay").innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name}`;
+                initDashboard();
+            }
+        }
+
+        // Event listeners
+        document.getElementById("editModal").addEventListener("click", function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Start app
+        checkSession();
+    </script>
 </body>
 </html>

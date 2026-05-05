@@ -13,6 +13,7 @@ function getToken() {
 // 🚪 Logout
 function logout() {
   localStorage.removeItem("token")
+  localStorage.removeItem("userProfile")
   window.location.href = "login.html"
 }
 
@@ -82,7 +83,8 @@ async function login(email, password) {
     window.location.href = "dashboard.html"
 
   } catch (err) {
-    showError(err.message)
+    console.error("Login error:", err)
+    showError(err.message || "Connection failed. Make sure the server is running on http://localhost:5000")
   }
 }
 
@@ -93,6 +95,10 @@ function showError(message) {
   if (errorBox) {
     errorBox.innerText = message
     errorBox.style.display = "block"
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      errorBox.style.display = "none"
+    }, 5000)
   } else {
     alert(message)
   }

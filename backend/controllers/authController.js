@@ -94,3 +94,32 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: "Login failed" })
   }
 }
+
+// GET CURRENT USER (Protected Route)
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.id
+
+    if (!userId) {
+      return res.status(400).json({ error: "Invalid token" })
+    }
+
+    const user = await userModel.findUserById(userId)
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" })
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      }
+    })
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: "Failed to fetch user" })
+  }
+}

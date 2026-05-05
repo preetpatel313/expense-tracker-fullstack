@@ -1,154 +1,176 @@
-const expenseModel = require("../models/expenseModel")
+const pool = require("../config/db")
 
-// ✅ GET all expenses
+// 🔐 Route Handlers (with req, res)
+
+// ✅ GET ALL EXPENSES
 exports.getExpenses = async (req, res) => {
   try {
-    const expenses = await expenseModel.getAllExpenses(req.user.id)
-    res.json(expenses)
+    const userId = req.user.id
+    const result = await pool.query(
+      "SELECT * FROM expenses WHERE user_id=$1 ORDER BY id DESC",
+      [userId]
+    )
+    res.json(result.rows)
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Failed to fetch expenses" })
+    res.status(500).json({ error: error.message })
   }
 }
 
-// ✅ ADD expense/income
 exports.addExpense = async (req, res) => {
   try {
-    const { title, amount, category, type } = req.body
-    const userId = req.user.id
+    const { title, amount, category, type } = req.body;
+    const userId = req.user.id;
 
-    if (!title || !amount || !type) {
-      return res.status(400).json({ error: "Title, amount, and type are required" })
+    if (!title || !amount || !category || !type) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (!["income", "expense"].includes(type)) {
-      return res.status(400).json({ error: "Type must be 'income' or 'expense'" })
-    }
+    const result = await pool.query(
+      `INSERT INTO expenses (title, amount, category, type, user_id)
+       VALUES ($1,$2,$3,$4,$5)
+       RETURNING *`,
+      [title, amount, category, type, userId]
+    );
 
-    const amountValue = Number(amount)
-    if (Number.isNaN(amountValue) || amountValue <= 0) {
-      return res.status(400).json({ error: "Amount must be a positive number" })
-    }
-
-    const newExpense = await expenseModel.createExpense(
-      title,
-      amountValue,
-      category || null,
-      type,
-      userId
-    )
-
-    res.status(201).json(newExpense)
+    res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Failed to create expense" })
+    console.error("Add error:", error);
+    res.status(500).json({ error: error.message });
   }
-}
+};
 
-// ✅ UPDATE
-exports.updateExpense = async (req, res) => {
-  try {
-    const id = parseInt(req.params.id)
-    if (Number.isNaN(id)) {
-      return res.status(400).json({ error: "Invalid expense id" })
-    }
 
-    const { title, amount, category, type } = req.body
-
-    if (!title || !amount || !type) {
-      return res.status(400).json({ error: "Title, amount, and type are required" })
-    }
-
-    if (!["income", "expense"].includes(type)) {
-      return res.status(400).json({ error: "Invalid type" })
-    }
-
-    const amountValue = Number(amount)
-    if (Number.isNaN(amountValue) || amountValue <= 0) {
-      return res.status(400).json({ error: "Amount must be positive" })
-    }
-
-    const updatedExpense = await expenseModel.updateExpense(
-      id,
-      title,
-      amountValue,
-      category || null,
-      type,
-      req.user.id
-    )
-
-    if (!updatedExpense) {
-      return res.status(404).json({ error: "Expense not found" })
-    }
-
-    res.json(updatedExpense)
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Update failed" })
-  }
-}
-
-// ✅ DELETE
+// ✅ DELETE EXPENSE
 exports.deleteExpense = async (req, res) => {
   try {
-    const id = parseInt(req.params.id)
-    if (Number.isNaN(id)) {
-      return res.status(400).json({ error: "Invalid expense id" })
-    }
+    const { id } = req.params
+    const userId = req.user.id
 
-    const deleted = await expenseModel.deleteExpense(id, req.user.id)
-
-    if (!deleted) {
+    const result = await pool.query(
+      "DELETE FROM expenses WHERE id=$1 AND user_id=$2 RETURNING *",
+      [id, userId]
+    )
+    
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: "Expense not found" })
     }
-
-    res.json({ message: "Expense deleted" })
+    
+    res.json({ message: "Expense deleted", expense: result.rows[0] })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Delete failed" })
+    res.status(500).json({ error: error.message })
   }
 }
 
-// ✅ TOTAL
+// ✅ GET TOTAL EXPENSES (ONLY type='expense')
 exports.getTotalExpenses = async (req, res) => {
   try {
-    const total = await expenseModel.getTotalExpenses(req.user.id)
-    res.json({ total })
+    const userId = req.user.id
+    const result = await pool.query(
+      `SELECT SUM(amount) AS total 
+       FROM expenses 
+       WHERE user_id=$1 AND type='expense'`,
+      [userId]
+    )
+    res.json({ total: result.rows[0].total || 0 })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Failed to get total" })
+    res.status(500).json({ error: error.message })
   }
 }
 
-// ✅ CATEGORY SUMMARY
+// ✅ GET CATEGORY SUMMARY (ONLY type='expense')
 exports.getCategorySummary = async (req, res) => {
   try {
-    const summary = await expenseModel.getCategorySummary(req.user.id)
-    res.json(summary)
+    const userId = req.user.id
+    const result = await pool.query(
+      `SELECT category, SUM(amount) AS total
+       FROM expenses
+       WHERE user_id=$1 AND type='expense'
+       GROUP BY category
+       ORDER BY total DESC`,
+      [userId]
+    )
+    res.json(result.rows)
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Failed to get summary" })
+    res.status(500).json({ error: error.message })
   }
 }
 
-// ✅ MONTHLY
+// ✅ GET MONTHLY EXPENSES (SEPARATE income & expense, handles multi-year)
 exports.getMonthlyExpenses = async (req, res) => {
   try {
-    const data = await expenseModel.getMonthlyExpenses(req.user.id)
-    res.json(data)
+    const userId = req.user.id
+    const result = await pool.query(
+      `SELECT 
+          TO_CHAR(created_at, 'YYYY-MM') AS month,
+          type,
+          SUM(amount) AS total
+       FROM expenses
+       WHERE user_id=$1
+       GROUP BY TO_CHAR(created_at, 'YYYY-MM'), type
+       ORDER BY month ASC`,
+      [userId]
+    )
+    res.json(result.rows)
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Failed to get monthly data" })
+    res.status(500).json({ error: error.message })
   }
 }
 
-// ✅ BALANCE
+// ✅ GET BALANCE (income - expense)
 exports.getBalance = async (req, res) => {
   try {
-    const data = await expenseModel.getBalance(req.user.id)
-    res.json(data)
+    const userId = req.user.id
+    const result = await pool.query(
+      `SELECT 
+          SUM(CASE WHEN type='income' THEN amount ELSE 0 END) AS total_income,
+          SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS total_expense
+       FROM expenses
+       WHERE user_id=$1`,
+      [userId]
+    )
+
+    const totalIncome = result.rows[0].total_income || 0
+    const totalExpense = result.rows[0].total_expense || 0
+
+    res.json({
+      totalIncome,
+      totalExpense,
+      balance: totalIncome - totalExpense
+    })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Failed to get balance" })
+    res.status(500).json({ error: error.message })
   }
 }
+
+
+exports.updateExpense = async (req, res) => {
+  try {
+  
+
+    const { id } = req.params;
+    const { title, amount, category, type } = req.body;
+    const userId = req.user.id;
+
+    if (!title || !amount || !category || !type) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const result = await pool.query(
+      `UPDATE expenses
+       SET title=$1, amount=$2, category=$3, type=$4
+       WHERE id=$5 AND user_id=$6
+       RETURNING *`,
+      [title, amount, category, type, id, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+
+    res.json(result.rows[0]);
+
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
